@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="d99fdc24-8a2a-4cfe-b763-44b7de66d1a1" name="変更" comment="">
+      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gradle.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gradlew" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gradlew.bat" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/libs/opencv-455.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/libs/opencv_java455.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/settings.gradle" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/kotlin/Main.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/kotlin/compose/ImageComposer.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/kotlin/data/DataLoader.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/kotlin/data/Enums.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/10C.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/10D.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/10H.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/10S.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/11C.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/11D.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/11H.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/11S.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/12C.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/12D.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/12H.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/12S.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/13C.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/13D.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/13H.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/13S.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/1C.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/1D.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/1H.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/1S.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/2C.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/2D.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/2H.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/2S.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/3C.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/3D.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/3H.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/3S.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/4C.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/4D.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/4H.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/4S.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/5C.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/5D.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/5H.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/5S.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/6C.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/6D.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/6H.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/6S.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/7C.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/7D.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/7H.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/7S.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/8C.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/8D.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/8H.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/8S.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/9C.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/9D.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/9H.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/9S.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/JOKER1.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/trump/JOKER2.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/urls/data1.json" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="ExternalProjectsManager">
+    <system id="GRADLE">
+      <state>
+        <projects_view>
+          <tree_state>
+            <expand>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="TrumpDatasetCreator" type="f1a62948:ProjectNode" />
+              </path>
+            </expand>
+            <select />
+          </tree_state>
+        </projects_view>
+      </state>
+    </system>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Kotlin Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="2Ade9nGIw6FQpYi7seMe39jXcCA" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "last_opened_file_path": "E:/IntelliJ/Projects/KCS/TrumpDatasetCreator/libs"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="E:\IntelliJ\Projects\KCS\TrumpDatasetCreator\libs" />
+      <recent name="E:\IntelliJ\Projects\KCS\TrumpDatasetCreator\src\main\resources\trump" />
+      <recent name="E:\IntelliJ\Projects\KCS\TrumpDatasetCreator\src\main\resources\data" />
+    </key>
+    <key name="MoveKotlinTopLevelDeclarationsDialog.RECENTS_KEY">
+      <recent name="compose" />
+      <recent name="data" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="Main" type="JetRunConfigurationType">
+      <option name="MAIN_CLASS_NAME" value="MainKt" />
+      <module name="TrumpDatasetCreator.main" />
+      <shortenClasspath name="NONE" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="アプリケーションレベル" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="デフォルトタスク">
+      <changelist id="d99fdc24-8a2a-4cfe-b763-44b7de66d1a1" name="変更" comment="" />
+      <created>1655343740644</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1655343740644</updated>
+      <workItem from="1655343741994" duration="13429000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/src/main/kotlin/compose/ImageComposer.kt</url>
+          <line>34</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>
