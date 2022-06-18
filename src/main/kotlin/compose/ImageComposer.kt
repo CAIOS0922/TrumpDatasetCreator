@@ -2,59 +2,87 @@ package compose
 
 import data.DataLoader
 import data.ImageUrlData
-import data.Trump
 import data.TrumpData
-import org.opencv.core.*
-import org.opencv.imgcodecs.Imgcodecs
-import org.opencv.imgproc.Imgproc
-import kotlin.math.max
-import kotlin.math.min
+import io.ktor.utils.io.core.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.opencv.core.Size
+import java.awt.RenderingHints
+import java.awt.geom.AffineTransform
+import java.awt.image.AffineTransformOp
+import java.awt.image.BufferedImage
+import javax.imageio.ImageIO
+import kotlin.math.abs
+import kotlin.math.cos
+import kotlin.math.floor
+import kotlin.math.sin
 import kotlin.random.Random
+
 
 class ImageComposer(private val dataLoader: DataLoader, private val setting: ComposeSetting = ComposeSetting()) {
 
     private val random = Random(System.currentTimeMillis())
 
-    suspend fun compose(trump: TrumpData, imageUrlData: ImageUrlData): Mat? {
-        val trumpMat = Imgcodecs.imread(trump.file.absolutePath)
-        val imageMat = dataLoader.getImage(imageUrlData) ?: return null
+    suspend fun compose(trump: TrumpData, imageUrlData: ImageUrlData): BufferedImage? {
+        var trumpImage = withContext(Dispatchers.IO) { ImageIO.read(trump.file.inputStream()) }
+        val backImage = dataLoader.getImage(imageUrlData) ?: return null
 
-        val trumpSize = getScaleSize(imageMat, trumpMat, setting.trumpSize.random())
-        Imgproc.resize(trumpMat, trumpMat, trumpSize)
+        val trumpSize = getScaleSize(backImage, trumpImage, setting.trumpSize.random())
+        trumpImage = trumpImage.resize(trumpSize.width.toInt(), trumpSize.height.toInt())
 
-        val locateX = imageMat.size().width * setting.locateX.random()
-        val locateY = imageMat.size().height * setting.locateY.random()
-        val locate = getLocate(trumpMat, locateX, locateY, false)
+        val angle = setting.rotate.random()
+        trumpImage = trumpImage.rotateImage(Math.toRadians(angle))
 
-        val roi = Rect(
-            locate.x.toInt(),
-            locate.y.toInt(),
-            min(trumpMat.cols(), imageMat.cols() - locateX.toInt()),
-            min(trumpMat.rows(), imageMat.rows() - locateY.toInt())
-        )
-        val settingMat = Mat(imageMat, roi)
+        val locateX = backImage.width * setting.locateX.random()
+        val locateY = backImage.height * setting.locateY.random()
 
-        //settingMat.copyTo(imageMat, trumpMat)
-        Core.add(imageMat, trumpMat, settingMat)
-
-        Imgcodecs.imwrite("${System.getProperty("user.dir")}/trump.jpg", trumpMat)
-        Imgcodecs.imwrite("${System.getProperty("user.dir")}/image.jpg", imageMat)
-        Imgcodecs.imwrite("${System.getProperty("user.dir")}/setting.jpg", settingMat)
-
-        return trumpMat
+        return backImage.overwrite(trumpImage, locateX.toInt(), locateY.toInt())
     }
 
-    private fun getScaleSize(parentMat: Mat, childMat: Mat, ratio: Double): Size {
-        val parentSize = parentMat.size()
-        val childSize = childMat.size()
-        val height = parentSize.height * ratio
-        val width = height * (childSize.width / childSize.height)
+    private fun BufferedImage.resize(width: Int, height: Int): BufferedImage {
+        return BufferedImage(width, height, BufferedImage.TYPE_INT_RGB).also {
+            val graphics = it.createGraphics()
+            graphics.drawImage(this, 0, 0, width, height, null)
+            graphics.dispose()
+        }
+    }
+
+    private fun BufferedImage.rotateImage(radian: Double): BufferedImage {
+        val sin = abs(sin(radian))
+        val cos = abs(cos(radian))
+
+        val nWidth = floor(width.toDouble() * cos + height.toDouble() * sin).toInt()
+        val nHeight = floor(height.toDouble() * cos + width.toDouble() * sin).toInt()
+
+        val rotatedImage = BufferedImage(nWidth, nHeight, BufferedImage.TYPE_INT_ARGB)
+        val graphics = rotatedImage.createGraphics()
+
+        graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC)
+        graphics.translate((nWidth - width) / 2, (nHeight - height) / 2) // rotation around the center point
+        graphics.rotate(radian, (width / 2).toDouble(), (height / 2).toDouble())
+        graphics.drawImage(this, 0, 0, null)
+        graphics.dispose()
+
+        return rotatedImage
+    }
+
+    private fun BufferedImage.overwrite(image: BufferedImage, _x: Int, _y: Int, isCenterBase: Boolean = true): BufferedImage {
+        val x = if(isCenterBase) (_x - (image.width / 2.0)).toInt() else _x
+        val y = if(isCenterBase) (_y - (image.height / 2.0)).toInt() else _y
+
+        return BufferedImage(this.width, this.height, BufferedImage.TYPE_INT_RGB).also {
+            val graphics = it.createGraphics()
+            graphics.drawImage(this, 0, 0, null)
+            graphics.drawImage(image, x, y, null)
+            graphics.dispose()
+        }
+    }
+
+    private fun getScaleSize(parentImage: BufferedImage, childImage: BufferedImage, ratio: Double): Size {
+        val height = parentImage.height * ratio
+        val width = height * (childImage.width.toDouble() / childImage.height)
 
         return Size(width, height)
-    }
-
-    private fun getLocate(childMat: Mat, x: Double, y: Double, isCenterBase: Boolean = true): Point {
-        return if(!isCenterBase) Point(x, y) else Point(x - (childMat.size().width / 2), y - (childMat.size().height / 2))
     }
 
     private fun ClosedFloatingPointRange<Double>.random(): Double {
@@ -63,7 +91,8 @@ class ImageComposer(private val dataLoader: DataLoader, private val setting: Com
 }
 
 data class ComposeSetting(
-    val trumpSize: ClosedFloatingPointRange<Double> = 0.3..0.8,
+    val trumpSize: ClosedFloatingPointRange<Double> = 0.2..0.8,
     val locateX: ClosedFloatingPointRange<Double> = 0.1..0.9,
     val locateY: ClosedFloatingPointRange<Double> = 0.1..0.9,
+    val rotate: ClosedFloatingPointRange<Double> = 0.0..360.0
 )

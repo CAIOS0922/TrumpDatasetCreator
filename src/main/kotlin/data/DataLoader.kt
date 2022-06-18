@@ -5,12 +5,10 @@ import io.ktor.client.engine.cio.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
-import org.opencv.core.Core
-import org.opencv.core.Mat
-import org.opencv.core.MatOfByte
-import org.opencv.imgcodecs.Imgcodecs
 import java.awt.image.BufferedImage
 import java.io.ByteArrayInputStream
 import java.io.File
@@ -47,14 +45,19 @@ class DataLoader {
         return resultList
     }
 
-    suspend fun getImage(imageUrl: ImageUrlData): Mat? {
+    suspend fun getImage(imageUrl: ImageUrlData): BufferedImage? {
+        if(imageUrl.image.take(4).lowercase() != "http") {
+            println("ERROR: URL format is incorrect. [${imageUrl.image.take(20)}...]")
+            return null
+        }
+
         val response = HttpClient(CIO).get(Url(imageUrl.image.deleteParameter()))
         if(!response.status.isSuccess()) {
             println("ERROR: Can't download image file. [${response.request.url}]")
             return null
         }
 
-        return Imgcodecs.imdecode(MatOfByte(*response.readBytes()), Imgcodecs.IMREAD_UNCHANGED)
+        return withContext(Dispatchers.IO) { ImageIO.read(ByteArrayInputStream(response.readBytes())) }
     }
 
     private fun getResourceFile(path: String): File {
