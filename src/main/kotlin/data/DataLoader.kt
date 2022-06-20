@@ -45,6 +45,11 @@ class DataLoader {
         return resultList
     }
 
+    fun getImageFiles(path: String): List<File> {
+        val dirFile = getResourceFile(path)
+        return dirFile.listFiles()?.toList() ?: emptyList()
+    }
+
     suspend fun getImage(imageUrl: ImageUrlData): BufferedImage? {
         if(imageUrl.image.take(4).lowercase() != "http") {
             println("ERROR: URL format is incorrect. [${imageUrl.image.take(20)}...]")
@@ -58,6 +63,10 @@ class DataLoader {
         }
 
         return withContext(Dispatchers.IO) { ImageIO.read(ByteArrayInputStream(response.readBytes())) }
+    }
+
+    suspend fun getImage(file: File): BufferedImage {
+        return withContext(Dispatchers.IO) { ImageIO.read(file.inputStream()) }
     }
 
     private fun getResourceFile(path: String): File {

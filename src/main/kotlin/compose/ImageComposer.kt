@@ -11,6 +11,7 @@ import java.awt.RenderingHints
 import java.awt.geom.AffineTransform
 import java.awt.image.AffineTransformOp
 import java.awt.image.BufferedImage
+import java.io.File
 import javax.imageio.ImageIO
 import kotlin.math.abs
 import kotlin.math.cos
@@ -24,19 +25,30 @@ class ImageComposer(private val dataLoader: DataLoader, private val setting: Com
     private val random = Random(System.currentTimeMillis())
 
     suspend fun compose(trump: TrumpData, imageUrlData: ImageUrlData): BufferedImage? {
-        var trumpImage = withContext(Dispatchers.IO) { ImageIO.read(trump.file.inputStream()) }
+        val trumpImage = withContext(Dispatchers.IO) { ImageIO.read(trump.file.inputStream()) }
         val backImage = dataLoader.getImage(imageUrlData) ?: return null
 
+        return compose(trumpImage, backImage)
+    }
+
+    suspend fun compose(trump: TrumpData, backImageFile: File): BufferedImage? {
+        val trumpImage = withContext(Dispatchers.IO) { ImageIO.read(trump.file.inputStream()) }
+        val backImage = dataLoader.getImage(backImageFile) ?: return null
+
+        return compose(trumpImage, backImage)
+    }
+
+    private fun compose(trumpImage: BufferedImage, backImage: BufferedImage): BufferedImage? {
         val trumpSize = getScaleSize(backImage, trumpImage, setting.trumpSize.random())
-        trumpImage = trumpImage.resize(trumpSize.width.toInt(), trumpSize.height.toInt())
+        var resultImage = trumpImage.resize(trumpSize.width.toInt(), trumpSize.height.toInt())
 
         val angle = setting.rotate.random()
-        trumpImage = trumpImage.rotateImage(Math.toRadians(angle))
+        resultImage = resultImage.rotateImage(Math.toRadians(angle))
 
         val locateX = backImage.width * setting.locateX.random()
         val locateY = backImage.height * setting.locateY.random()
 
-        return backImage.overwrite(trumpImage, locateX.toInt(), locateY.toInt())
+        return backImage.overwrite(resultImage, locateX.toInt(), locateY.toInt())
     }
 
     private fun BufferedImage.resize(width: Int, height: Int): BufferedImage {
