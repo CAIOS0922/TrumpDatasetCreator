@@ -5,6 +5,8 @@ import kotlinx.coroutines.*
 import org.opencv.core.Core
 import java.io.File
 import javax.imageio.ImageIO
+import kotlin.math.ceil
+import kotlin.math.floor
 
 fun main(args: Array<String>) {
     initOpenCV()
@@ -31,35 +33,62 @@ fun composeFromFile(dataLoader: DataLoader, imageComposer: ImageComposer) {
     val trainDir = getDir(saveDir, "/train/")
     val validDir = getDir(saveDir, "/valid/")
 
+    val validRate = 0.1
+
     val disposableTrumps = originalTrumps.toMutableList()
-    val createdData = mutableMapOf<Trump, Int>()
+    val createdData = mutableMapOf<Trump, MutableList<File>>()
+    val validData = mutableMapOf<Trump, Int>()
 
     runBlocking {
         for (backImageFile in imageFiles) {
             if(disposableTrumps.isEmpty()) disposableTrumps.addAll(originalTrumps)
 
-            val trumps = disposableTrumps.take(3)
+            val trumps = disposableTrumps.take(10)
             disposableTrumps.removeAll(trumps)
 
             trumps.map { async {
                 val image = imageComposer.compose(it, backImageFile) ?: return@async
-                val name = "${it.id.value}-DM-${createdData[it.id] ?: 0}"
+                val name = "${it.id.value}-DM-${createdData[it.id]?.size ?: 0}"
                 val saveFile = File(getDir(trainDir, it.id.value), "$name.jpg")
 
                 withContext(Dispatchers.IO) { ImageIO.write(image, "JPG", saveFile) }
-                createdData[it.id] = createdData[it.id]?.plus(1) ?: 1
+
+                if(createdData[it.id] != null) createdData[it.id]!!.add(saveFile)
+                else createdData[it.id] = mutableListOf(saveFile)
 
                 println("${name}, ${backImageFile.name}...")
             } }.awaitAll()
         }
+
+        for ((trump, files) in createdData) {
+            val validSize = ceil(files.size * validRate).toInt()
+            val moveFiles = files.shuffled().take(validSize)
+
+            validData[trump] = moveFiles.size
+
+            for ((i, file) in moveFiles.withIndex()) {
+                val saveFile = File(getDir(validDir, trump.value), file.name)
+
+                file.copyTo(saveFile)
+                file.delete()
+
+                println("Valid data moving... [${trump.value}:$i] ${saveFile.absolutePath}")
+            }
+        }
     }
 
-    println("[FINISH] Created ${createdData.toList().sumOf { it.second }} data. [${saveDir.absolutePath}]")
+    val allSize = createdData.values.flatten().size
+    val validSize = validData.values.sum()
+    val trainSize = allSize - validSize
+
+    println("[FINISH] Created $allSize data. (train: $trainSize, valid: $validSize) [DIR: ${saveDir.absolutePath}]")
 }
 
 fun composeFromJson(dataLoader: DataLoader, imageComposer: ImageComposer) {
     val originalTrumps = dataLoader.getOriginalTrumps("/trump/").shuffled()
     val imageUrls = dataLoader.getImageUrls("/urls/").shuffled()
+
+    println("Trumps: ${originalTrumps.size}, Background: ${imageUrls.size}")
 
     val disposableTrumps = originalTrumps.toMutableList()
     val chunkedUrls = imageUrls.chunked(imageUrls.size / originalTrumps.size)
@@ -77,13 +106,13 @@ fun composeFromJson(dataLoader: DataLoader, imageComposer: ImageComposer) {
             for (data in urls) {
                 if(disposableTrumps.isEmpty()) disposableTrumps.addAll(originalTrumps)
 
-                val trumps = disposableTrumps.take(5)
+                val trumps = disposableTrumps.take(10)
                 disposableTrumps.removeAll(trumps)
 
                 for (trump in trumps) {
                     val image = imageComposer.compose(trump, data) ?: continue
                     val name = "${trump.id.value}-DM-${createdData[trump.id] ?: 0}"
-                    val saveFile = File(getDir(if((createdData[trump.id] ?: 0) < 3) validDir else trainDir, trump.id.value), "$name.jpg")
+                    val saveFile = File(getDir(if((createdData[trump.id] ?: 0) < 10) validDir else trainDir, trump.id.value), "$name.jpg")
 
                     withContext(Dispatchers.IO) { ImageIO.write(image, "JPG", saveFile) }
                     createdData[trump.id] = createdData[trump.id]?.plus(1) ?: 1

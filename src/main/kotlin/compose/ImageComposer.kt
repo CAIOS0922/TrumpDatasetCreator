@@ -7,6 +7,7 @@ import io.ktor.utils.io.core.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.opencv.core.Size
+import sun.awt.image.BufferedImageDevice
 import java.awt.RenderingHints
 import java.awt.geom.AffineTransform
 import java.awt.image.AffineTransformOp
@@ -20,33 +21,33 @@ import kotlin.math.sin
 import kotlin.random.Random
 
 
-class ImageComposer(private val dataLoader: DataLoader, private val setting: ComposeSetting = ComposeSetting()) {
+class ImageComposer(private val dataLoader: DataLoader) {
 
     private val random = Random(System.currentTimeMillis())
 
-    suspend fun compose(trump: TrumpData, imageUrlData: ImageUrlData): BufferedImage? {
+    suspend fun compose(trump: TrumpData, imageUrlData: ImageUrlData, setting: ComposeSetting = ComposeSetting()): BufferedImage? {
         val trumpImage = withContext(Dispatchers.IO) { ImageIO.read(trump.file.inputStream()) }
         val backImage = dataLoader.getImage(imageUrlData) ?: return null
 
-        return compose(trumpImage, backImage)
+        return compose(trumpImage, backImage, setting)
     }
 
-    suspend fun compose(trump: TrumpData, backImageFile: File): BufferedImage? {
+    suspend fun compose(trump: TrumpData, backImageFile: File, setting: ComposeSetting = ComposeSetting()): BufferedImage {
         val trumpImage = withContext(Dispatchers.IO) { ImageIO.read(trump.file.inputStream()) }
-        val backImage = dataLoader.getImage(backImageFile) ?: return null
+        val backImage = dataLoader.getImage(backImageFile)
 
-        return compose(trumpImage, backImage)
+        return compose(trumpImage, backImage, setting)
     }
 
-    private fun compose(trumpImage: BufferedImage, backImage: BufferedImage): BufferedImage? {
-        val trumpSize = getScaleSize(backImage, trumpImage, setting.trumpSize.random())
+    private fun compose(trumpImage: BufferedImage, backImage: BufferedImage, setting: ComposeSetting = ComposeSetting()): BufferedImage {
+        val trumpSize = getScaleSize(backImage, trumpImage, setting.trumpSize)
         var resultImage = trumpImage.resize(trumpSize.width.toInt(), trumpSize.height.toInt())
 
-        val angle = setting.rotate.random()
+        val angle = setting.rotate
         resultImage = resultImage.rotateImage(Math.toRadians(angle))
 
-        val locateX = backImage.width * setting.locateX.random()
-        val locateY = backImage.height * setting.locateY.random()
+        val locateX = backImage.width * setting.locateX
+        val locateY = backImage.height * setting.locateY
 
         return backImage.overwrite(resultImage, locateX.toInt(), locateY.toInt())
     }
@@ -96,15 +97,14 @@ class ImageComposer(private val dataLoader: DataLoader, private val setting: Com
 
         return Size(width, height)
     }
-
-    private fun ClosedFloatingPointRange<Double>.random(): Double {
-        return random.nextDouble(this.start, this.endInclusive)
-    }
+    data class ComposeSetting(
+        val trumpSize: Double = (0.3..0.8).random(),
+        val locateX: Double = (0.2..0.8).random(),
+        val locateY: Double = (0.2..0.8).random(),
+        val rotate: Double = (0.0..360.0).random()
+    )
 }
 
-data class ComposeSetting(
-    val trumpSize: ClosedFloatingPointRange<Double> = 0.2..0.8,
-    val locateX: ClosedFloatingPointRange<Double> = 0.1..0.9,
-    val locateY: ClosedFloatingPointRange<Double> = 0.1..0.9,
-    val rotate: ClosedFloatingPointRange<Double> = 0.0..360.0
-)
+fun ClosedFloatingPointRange<Double>.random(): Double {
+    return Random.nextDouble(this.start, this.endInclusive)
+}

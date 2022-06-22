@@ -38,11 +38,12 @@ class DataLoader {
         for(file in jsonFiles ?: emptyArray()) {
             val json = file.readText()
             val serializer = ListSerializer(ImageUrlData.serializer())
+            val list = Json.decodeFromString(serializer, json)
 
-            resultList.addAll(Json.decodeFromString(serializer, json))
+            resultList.addAll(list.map { ImageUrlData(it.image.deleteParameter(), it.iusc) })
         }
 
-        return resultList
+        return resultList.distinctBy { it.image }
     }
 
     fun getImageFiles(path: String): List<File> {
@@ -51,18 +52,23 @@ class DataLoader {
     }
 
     suspend fun getImage(imageUrl: ImageUrlData): BufferedImage? {
-        if(imageUrl.image.take(4).lowercase() != "http") {
-            println("ERROR: URL format is incorrect. [${imageUrl.image.take(20)}...]")
+        try {
+            if (imageUrl.image.take(4).lowercase() != "http") {
+                println("ERROR: URL format is incorrect. [${imageUrl.image.take(20)}...]")
+                return null
+            }
+
+            val response = HttpClient(CIO).get(Url(imageUrl.image.deleteParameter()))
+            if (!response.status.isSuccess()) {
+                println("ERROR: Can't download image file. [${response.request.url}]")
+                return null
+            }
+
+            return withContext(Dispatchers.IO) { ImageIO.read(ByteArrayInputStream(response.readBytes())) }
+        } catch (e: Throwable) {
+            println("ERROR: getImage throw ${e.stackTrace[0]}")
             return null
         }
-
-        val response = HttpClient(CIO).get(Url(imageUrl.image.deleteParameter()))
-        if(!response.status.isSuccess()) {
-            println("ERROR: Can't download image file. [${response.request.url}]")
-            return null
-        }
-
-        return withContext(Dispatchers.IO) { ImageIO.read(ByteArrayInputStream(response.readBytes())) }
     }
 
     suspend fun getImage(file: File): BufferedImage {
