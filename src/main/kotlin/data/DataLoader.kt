@@ -6,15 +6,19 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.Json.Default.decodeFromString
 import java.awt.image.BufferedImage
 import java.io.ByteArrayInputStream
 import java.io.File
 import javax.imageio.ImageIO
 
 class DataLoader {
+
+    private val formatter = Json { ignoreUnknownKeys = true }
     fun getOriginalTrumps(path: String): List<TrumpData> {
         val dirFile = getResourceFile(path)
         val trumpsFile = dirFile.listFiles()
@@ -38,9 +42,9 @@ class DataLoader {
         for(file in jsonFiles ?: emptyArray()) {
             val json = file.readText()
             val serializer = ListSerializer(ImageUrlData.serializer())
-            val list = Json.decodeFromString(serializer, json)
+            val list = formatter.decodeFromString(serializer, json)
 
-            resultList.addAll(list.map { ImageUrlData(it.image.deleteParameter(), it.iusc) })
+            resultList.addAll(list.map { ImageUrlData(it.image, it.iusc) })
         }
 
         return resultList.distinctBy { it.image }
@@ -58,7 +62,7 @@ class DataLoader {
                 return null
             }
 
-            val response = HttpClient(CIO).get(Url(imageUrl.image.deleteParameter()))
+            val response = HttpClient(CIO).get(Url(imageUrl.image))
             if (!response.status.isSuccess()) {
                 println("ERROR: Can't download image file. [${response.request.url}]")
                 return null
@@ -67,11 +71,12 @@ class DataLoader {
             return withContext(Dispatchers.IO) { ImageIO.read(ByteArrayInputStream(response.readBytes())) }
         } catch (e: Throwable) {
             println("ERROR: getImage throw ${e.stackTrace[0]}")
+            delay(100)
             return null
         }
     }
 
-    suspend fun getImage(file: File): BufferedImage {
+    suspend fun getImage(file: File): BufferedImage? {
         return withContext(Dispatchers.IO) { ImageIO.read(file.inputStream()) }
     }
 
@@ -95,4 +100,6 @@ data class TrumpData(
 data class ImageUrlData(
     val image: String = "",
     val iusc: String = "",
+    val oztcrd: String = "",
+    val fxgdke: String = ""
 )

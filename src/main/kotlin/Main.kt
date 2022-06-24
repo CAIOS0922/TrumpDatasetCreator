@@ -6,13 +6,12 @@ import org.opencv.core.Core
 import java.io.File
 import javax.imageio.ImageIO
 import kotlin.math.ceil
-import kotlin.math.floor
 
 fun main(args: Array<String>) {
     initOpenCV()
 
     val dataLoader = DataLoader()
-    val imageComposer = ImageComposer(dataLoader)
+    val imageComposer = ImageComposer()
 
     print("Enter whether you want to load images from a directory [D] or from JSON [J] > ")
 
@@ -35,19 +34,28 @@ fun composeFromFile(dataLoader: DataLoader, imageComposer: ImageComposer) {
 
     val validRate = 0.1
 
-    val disposableTrumps = originalTrumps.toMutableList()
+    val disposableTrumps = originalTrumps.toMutableSet()
     val createdData = mutableMapOf<Trump, MutableList<File>>()
     val validData = mutableMapOf<Trump, Int>()
 
+    val takeCount = 10
+    val allIndex = imageFiles.size * takeCount
+    var index = 1
+
     runBlocking {
         for (backImageFile in imageFiles) {
-            if(disposableTrumps.isEmpty()) disposableTrumps.addAll(originalTrumps)
+            if(disposableTrumps.size < takeCount) disposableTrumps.addAll(originalTrumps)
 
-            val trumps = disposableTrumps.take(10)
+            val backImage = dataLoader.getImage(backImageFile)
+            val trumps = disposableTrumps.take(10).toSet()
             disposableTrumps.removeAll(trumps)
 
             trumps.map { async {
-                val image = imageComposer.compose(it, backImageFile) ?: return@async
+                val image = imageComposer.compose(it, backImage) ?: kotlin.run {
+                    println("Error: Compose failed. ${it.id}, ${backImageFile.absolutePath}")
+                    return@async
+                }
+
                 val name = "${it.id.value}-DM-${createdData[it.id]?.size ?: 0}"
                 val saveFile = File(getDir(trainDir, it.id.value), "$name.jpg")
 
@@ -56,7 +64,9 @@ fun composeFromFile(dataLoader: DataLoader, imageComposer: ImageComposer) {
                 if(createdData[it.id] != null) createdData[it.id]!!.add(saveFile)
                 else createdData[it.id] = mutableListOf(saveFile)
 
-                println("${name}, ${backImageFile.name}...")
+                println("[$index/$allIndex] ${name}, ${backImageFile.name}...")
+
+                index++
             } }.awaitAll()
         }
 
@@ -69,7 +79,7 @@ fun composeFromFile(dataLoader: DataLoader, imageComposer: ImageComposer) {
             for ((i, file) in moveFiles.withIndex()) {
                 val saveFile = File(getDir(validDir, trump.value), file.name)
 
-                file.copyTo(saveFile)
+                file.copyTo(saveFile, overwrite = true)
                 file.delete()
 
                 println("Valid data moving... [${trump.value}:$i] ${saveFile.absolutePath}")
@@ -90,8 +100,7 @@ fun composeFromJson(dataLoader: DataLoader, imageComposer: ImageComposer) {
 
     println("Trumps: ${originalTrumps.size}, Background: ${imageUrls.size}")
 
-    val disposableTrumps = originalTrumps.toMutableList()
-    val chunkedUrls = imageUrls.chunked(imageUrls.size / originalTrumps.size)
+    val disposableTrumps = originalTrumps.toMutableSet()
 
     val saveDir = File("${System.getProperty("user.dir")}/dataset/")
     if(!saveDir.exists()) saveDir.mkdir()
@@ -99,26 +108,40 @@ fun composeFromJson(dataLoader: DataLoader, imageComposer: ImageComposer) {
     val trainDir = getDir(saveDir, "/train/")
     val validDir = getDir(saveDir, "/valid/")
 
+    val takeCount = 10
     val createdData = mutableMapOf<Trump, Int>()
 
+    val allSize = imageUrls.size * takeCount
+    var count = 1
+    var createdCount = 1
+
     runBlocking {
-        for (urls in chunkedUrls) {
-            for (data in urls) {
-                if(disposableTrumps.isEmpty()) disposableTrumps.addAll(originalTrumps)
+        for (data in imageUrls) {
+            if (disposableTrumps.size < takeCount) disposableTrumps.addAll(originalTrumps)
 
-                val trumps = disposableTrumps.take(10)
-                disposableTrumps.removeAll(trumps)
+            val backImage = dataLoader.getImage(data)
+            val trumps = disposableTrumps.take(takeCount).toSet()
+            disposableTrumps.removeAll(trumps)
 
-                for (trump in trumps) {
-                    val image = imageComposer.compose(trump, data) ?: continue
-                    val name = "${trump.id.value}-DM-${createdData[trump.id] ?: 0}"
-                    val saveFile = File(getDir(if((createdData[trump.id] ?: 0) < 10) validDir else trainDir, trump.id.value), "$name.jpg")
+            for (trump in trumps) {
+                val image = imageComposer.compose(trump, backImage)
 
-                    withContext(Dispatchers.IO) { ImageIO.write(image, "JPG", saveFile) }
-                    createdData[trump.id] = createdData[trump.id]?.plus(1) ?: 1
-
-                    println("${name}, ${data.image.take(40)}...")
+                if (image == null) {
+                    println("[$count/$allSize/$createdCount] ERROR: Background image is null. ${backImage == null}")
+                    count++
+                    continue
                 }
+
+                val name = "${trump.id.value}-DM-${createdData[trump.id] ?: 0}"
+                val saveFile = File(getDir(if ((createdData[trump.id] ?: 0) < 15) validDir else trainDir, trump.id.value), "$name.jpg")
+
+                withContext(Dispatchers.IO) { ImageIO.write(image, "JPG", saveFile) }
+                createdData[trump.id] = createdData[trump.id]?.plus(1) ?: 1
+
+                println("[$count/$allSize/$createdCount] ${name}, ${data.image.take(40)}...")
+
+                count++
+                createdCount++
             }
         }
     }

@@ -21,25 +21,18 @@ import kotlin.math.sin
 import kotlin.random.Random
 
 
-class ImageComposer(private val dataLoader: DataLoader) {
+class ImageComposer {
 
-    private val random = Random(System.currentTimeMillis())
+    suspend fun compose(trump: TrumpData, backImage: BufferedImage?, setting: ComposeSetting = ComposeSetting()): BufferedImage? {
+        backImage ?: return null
 
-    suspend fun compose(trump: TrumpData, imageUrlData: ImageUrlData, setting: ComposeSetting = ComposeSetting()): BufferedImage? {
         val trumpImage = withContext(Dispatchers.IO) { ImageIO.read(trump.file.inputStream()) }
-        val backImage = dataLoader.getImage(imageUrlData) ?: return null
-
         return compose(trumpImage, backImage, setting)
     }
 
-    suspend fun compose(trump: TrumpData, backImageFile: File, setting: ComposeSetting = ComposeSetting()): BufferedImage {
-        val trumpImage = withContext(Dispatchers.IO) { ImageIO.read(trump.file.inputStream()) }
-        val backImage = dataLoader.getImage(backImageFile)
+    private fun compose(trumpImage: BufferedImage, backImage: BufferedImage, setting: ComposeSetting = ComposeSetting()): BufferedImage? {
+        if(backImage.width < 180 || backImage.height < 180) return null
 
-        return compose(trumpImage, backImage, setting)
-    }
-
-    private fun compose(trumpImage: BufferedImage, backImage: BufferedImage, setting: ComposeSetting = ComposeSetting()): BufferedImage {
         val trumpSize = getScaleSize(backImage, trumpImage, setting.trumpSize)
         var resultImage = trumpImage.resize(trumpSize.width.toInt(), trumpSize.height.toInt())
 
@@ -49,7 +42,9 @@ class ImageComposer(private val dataLoader: DataLoader) {
         val locateX = backImage.width * setting.locateX
         val locateY = backImage.height * setting.locateY
 
-        return backImage.overwrite(resultImage, locateX.toInt(), locateY.toInt())
+        resultImage = backImage.overwrite(resultImage, locateX.toInt(), locateY.toInt())
+
+        return resultImage.resize(224, 224)
     }
 
     private fun BufferedImage.resize(width: Int, height: Int): BufferedImage {
